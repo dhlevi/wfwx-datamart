@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="readings">
+  <sql id="count">
+    COUNT(*)
+  </sql>
+
+  <sql id="attributes">
+    r.station_code,
+    s.station_name,
+    r.timestamp_epoch,
+    to_timestamp(cast(r.timestamp_epoch/1000 as bigint))::date AS timestamp,
+    r.daily_ind,
+    r.temperature,
+    r.relative_humidity,
+    r.wind_speed,
+    r.wind_direction,
+    r.wind_gust,
+    r.precipitation,
+    r.precip_rollup,
+    r.bui,
+    r.isi,
+    r.ffmc,
+    r.dmc,
+    r.dc,
+    r.fwi,
+    r.danger
+  </sql>
+
+  <select id="readings_count">
+    SELECT COUNT(*) FROM wfwx.readings
+  </select>
+
+  <select id="readings_paged">
+    SELECT 
+      <if test="isCount == true">
+        <include refid="count">
+        </include>
+      </if>
+      <if test="isCount == false">
+        <include refid="attributes">
+        </include>
+      </if>
+	    FROM wfwx.readings r
+      JOIN wfwx.station s ON s.station_code = r.station_code
+     WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
+    <if test="xmin != null and ymin != null and xmax != null and ymax != null">
+      AND s.geometry &amp;&amp; ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+    </if>
+    <if test="long != null and lat != null and radius != null">
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+    </if>
+    <if test="station != null and useInClause == false">
+      AND s.station_code = ${station}
+    </if>
+    <if test="station != null and useInClause == true">
+      AND s.station_code IN (${station})
+    </if>
+    <if test="offset != null and rows != null">
+      OFFSET ${offset} ROWS
+      FETCH NEXT ${rows} ROWS ONLY
+		</if>
+  </select>
+
+  <select id="dailies_paged">
+    SELECT 
+      <if test="isCount == true">
+        <include refid="count">
+        </include>
+      </if>
+      <if test="isCount == false">
+        <include refid="attributes">
+        </include>
+      </if>
+	    FROM wfwx.readings r
+      JOIN wfwx.station s ON s.station_code = r.station_code
+     WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
+       AND r.daily_ind = true
+    <if test="xmin != null and ymin != null and xmax != null and ymax != null">
+      AND s.geometry &amp;&amp; ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+    </if>
+    <if test="long != null and lat != null and radius != null">
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+    </if>
+    <if test="station != null and useInClause == false">
+      AND s.station_code = ${station}
+    </if>
+    <if test="station != null and useInClause == true">
+      AND s.station_code IN (${station})
+    </if>
+    <if test="offset != null and rows != null">
+      OFFSET ${offset} ROWS
+      FETCH NEXT ${rows} ROWS ONLY
+		</if>
+  </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stations">
+  <sql id="geojson">
+    SELECT
+			json_build_object(
+				'type', 'FeatureCollection',
+				'features', json_agg(ST_AsGeoJSON(t.*)::json)
+			)
+  </sql>
+  <sql id="count">
+    COUNT(*)
+  </sql>
+  <sql id="attributes">
+    t.station_name,
+    t.station_code,
+    t.station_acronym,
+    t.latitude,
+    t.longitude,
+    t.elevation,
+    t.slope,
+    t.aspect,
+    t.windspeed_height,
+    t.adjusted_roughness
+  </sql>
+
+  <select id="stations_count">
+    SELECT COUNT(*) FROM wfwx.station
+  </select>
+
+  <select id="by_code">
+    SELECT
+    <include refid="attributes">
+    </include>
+	    FROM wfwx.station t
+     WHERE t.station_code = ${code}
+  </select>
+
+  <select id="stations_paged">
+    <if test="asGeojson == true">
+      <include refid="geojson">
+      </include>
+    </if>
+    <if test="asGeojson == false">
+    SELECT
+      <if test="isCount == true">
+        <include refid="count">
+        </include>
+      </if>
+      <if test="isCount == false">
+        <include refid="attributes">
+        </include>
+      </if>
+    </if>
+	    FROM wfwx.station t
+    <if test="xmin != null and ymin != null and xmax != null and ymax != null">
+      WHERE t.geometry &amp;&amp; ST_MakeEnvelope (${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+    </if>
+    <if test="long != null and lat != null and radius != null">
+      WHERE ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+    </if>
+    <if test="offset != null and rows != null">
+      OFFSET ${offset} ROWS
+      FETCH NEXT ${rows} ROWS ONLY
+		</if>
+  </select>
+</mapper>

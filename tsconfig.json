@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+      "outDir": "./build",
+      "allowJs": false,
+      "target": "es2017",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "sourceMap": true,
+      "strict": true,
+      "experimentalDecorators": true,
+      "jsx": "react",
+      "importHelpers": true,
+      "lib": [ "es2017", "dom" ],
+      "emitDecoratorMetadata": true
+  },
+  "include": [
+      "./lib",
+      "./public"
+  ],
+  "exclude": []
+}
