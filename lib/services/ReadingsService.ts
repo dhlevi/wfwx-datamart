@@ -5,7 +5,7 @@ import { ApiResponse } from "../core/model/ApiResponse"
 import { PagedResult } from "../core/model/PagedResult"
 
 export class ReadingsService {
-  public async getReadings (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number): Promise<any> {
+  public async getReadings (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string): Promise<any> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/readings-queries.xml')])
 
     // Max of 31 days
@@ -56,7 +56,15 @@ export class ReadingsService {
     // create query and fetch result
     const useInClause = station && station.includes(',')
 
-    const sql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
+    // orderby
+    const orderby = order ? order.split(',') : []
+    for (let i = 0; i < orderby.length; i++) {
+      if (i < orderby.length - 1 && (orderby[i].toUpperCase() === 'ASC' || orderby[i].toUpperCase() === 'DESC')) {
+        orderby[i] = orderby[i].toUpperCase() + ','
+      }
+    }
+
+    const sql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby }, { language: 'sql', indent: ' ' })
     const result = await Database.query(sql)
     const countSql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
     const countResult = await Database.query(countSql)
@@ -67,7 +75,7 @@ export class ReadingsService {
     }
   }
 
-  public async getDailies (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number): Promise<any> {
+  public async getDailies (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string): Promise<any> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/readings-queries.xml')])
 
     // Max of 31 days
@@ -118,7 +126,15 @@ export class ReadingsService {
     // create query and fetch result
     const useInClause = station && station.includes(',')
 
-    const sql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
+    // orderby
+    const orderby = order ? order.split(',') : []
+    for (let i = 0; i < orderby.length; i++) {
+      if (i < orderby.length - 1 && (orderby[i].toUpperCase() === 'ASC' || orderby[i].toUpperCase() === 'DESC')) {
+        orderby[i] = orderby[i].toUpperCase() + ','
+      }
+    }
+
+    const sql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby }, { language: 'sql', indent: ' ' })
     const result = await Database.query(sql)
     const countSql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
     const countResult = await Database.query(countSql)

@@ -4,7 +4,7 @@ import path = require("path")
 import { PagedResult } from "../core/model/PagedResult"
 
 export class StationsService {
-  public async getStations (page: number, rows: number, asGeojson: boolean, bbox: string, longLat: string, radius: number): Promise<any | undefined> {
+  public async getStations (page: number, rows: number, asGeojson: boolean, bbox: string, longLat: string, radius: number, order: string): Promise<any | undefined> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/station-queries.xml')])
 
     // calculate offset
@@ -47,8 +47,16 @@ export class StationsService {
       }
     }
 
+    // orderby
+    const orderby = order ? order.split(',') : []
+    for (let i = 0; i < orderby.length; i++) {
+      if (i < orderby.length - 1 && (orderby[i].toUpperCase() === 'ASC' || orderby[i].toUpperCase() === 'DESC')) {
+        orderby[i] = orderby[i].toUpperCase() + ','
+      }
+    }
+
     // create query and fetch result
-    const sql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: false, offset, rows, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius }, {language: 'sql', indent: ' '})
+    const sql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: false, offset, rows, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius, orderby }, {language: 'sql', indent: ' '})
     const result = await Database.query(sql)
 
     if (result && asGeojson) {

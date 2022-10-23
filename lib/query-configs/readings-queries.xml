@@ -56,6 +56,34 @@
     <if test="station != null and useInClause == true">
       AND s.station_code IN (${station})
     </if>
+    <if test="orderby != null and orderby.length > 0">
+      ORDER BY
+      <foreach collection="orderby" item="order">
+        <choose>
+          <when test="order == 'station_code'">station_code</when>
+          <when test="order == 'station_name'">station_name</when>
+          <when test="order == 'timestamp_epoch'">timestamp_epoch</when>
+          <when test="order == 'temperature'">temperature</when>
+          <when test="order == 'relative_humidity'">relative_humidity</when>
+          <when test="order == 'wind_speed'">wind_speed</when>
+          <when test="order == 'wind_direction'">wind_direction</when>
+          <when test="order == 'wind_gust'">wind_gust</when>
+          <when test="order == 'precipitation'">precipitation</when>
+          <when test="order == 'precip_rollup'">precip_rollup</when>
+          <when test="order == 'bui'">bui</when>
+          <when test="order == 'isi'">isi</when>
+          <when test="order == 'ffmc'">ffmc</when>
+          <when test="order == 'dmc'">dmc</when>
+          <when test="order == 'dc'">dc</when>
+          <when test="order == 'fwi'">fwi</when>
+          <when test="order == 'danger'">danger</when>
+          <when test="order == 'ASC'"> ASC</when>
+          <when test="order == 'ASC,'"> ASC,</when>
+          <when test="order == 'DESC'"> DESC</when>
+          <when test="order == 'DESC,'"> DESC,</when>
+        </choose>
+      </foreach>
+    </if>
     <if test="offset != null and rows != null">
       OFFSET ${offset} ROWS
       FETCH NEXT ${rows} ROWS ONLY
@@ -87,6 +115,34 @@
     </if>
     <if test="station != null and useInClause == true">
       AND s.station_code IN (${station})
+    </if>
+    <if test="orderby != null and orderby.length > 0">
+      ORDER BY
+      <foreach collection="orderby" item="order">
+        <choose>
+          <when test="order == 'station_code'">station_code</when>
+          <when test="order == 'station_name'">station_name</when>
+          <when test="order == 'timestamp_epoch'">timestamp_epoch</when>
+          <when test="order == 'temperature'">temperature</when>
+          <when test="order == 'relative_humidity'">relative_humidity</when>
+          <when test="order == 'wind_speed'">wind_speed</when>
+          <when test="order == 'wind_direction'">wind_direction</when>
+          <when test="order == 'wind_gust'">wind_gust</when>
+          <when test="order == 'precipitation'">precipitation</when>
+          <when test="order == 'precip_rollup'">precip_rollup</when>
+          <when test="order == 'bui'">bui</when>
+          <when test="order == 'isi'">isi</when>
+          <when test="order == 'ffmc'">ffmc</when>
+          <when test="order == 'dmc'">dmc</when>
+          <when test="order == 'dc'">dc</when>
+          <when test="order == 'fwi'">fwi</when>
+          <when test="order == 'danger'">danger</when>
+          <when test="order == 'ASC'"> ASC</when>
+          <when test="order == 'ASC,'"> ASC,</when>
+          <when test="order == 'DESC'"> DESC</when>
+          <when test="order == 'DESC,'"> DESC,</when>
+        </choose>
+      </foreach>
     </if>
     <if test="offset != null and rows != null">
       OFFSET ${offset} ROWS

@@ -59,6 +59,23 @@
     <if test="long != null and lat != null and radius != null">
       WHERE ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
     </if>
+    <if test="orderby != null and orderby.length > 0">
+      ORDER BY
+      <foreach collection="orderby" item="order">
+        <choose>
+          <when test="order == 'station_name'">station_name</when>
+          <when test="order == 'station_code'">station_code</when>
+          <when test="order == 'station_acronym'">station_acronym</when>
+          <when test="order == 'latitude'">latitude</when>
+          <when test="order == 'longitude'">longitude</when>
+          <when test="order == 'elevation'">elevation</when>
+          <when test="order == 'ASC'"> ASC</when>
+          <when test="order == 'ASC,'"> ASC,</when>
+          <when test="order == 'DESC'"> DESC</when>
+          <when test="order == 'DESC,'"> DESC,</when>
+        </choose>
+      </foreach>
+    </if>
     <if test="offset != null and rows != null">
       OFFSET ${offset} ROWS
       FETCH NEXT ${rows} ROWS ONLY
