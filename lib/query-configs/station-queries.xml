@@ -57,7 +57,7 @@
       WHERE t.geometry && ST_MakeEnvelope (${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      WHERE ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+      WHERE ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
     </if>
     <if test="where != null">
       <choose>

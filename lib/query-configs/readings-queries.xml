@@ -48,7 +48,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
@@ -111,7 +111,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
@@ -154,5 +154,232 @@
       OFFSET ${offset} ROWS
       FETCH NEXT ${rows} ROWS ONLY
 		</if>
+  </select>
+
+  <select id="readings_stats">
+    SELECT
+      r.station_code,
+      s.station_name,
+      MIN(temperature) AS min_temp,
+      MIN(precipitation) AS min_precip,
+      MIN(relative_humidity) AS min_humidity,
+      MIN(wind_speed) AS min_windspeed,
+      MIN(bui) AS min_bui,
+      MIN(isi) AS min_isi,
+      MIN(ffmc) AS min_ffmc,
+      MIN(dmc) AS min_dmc,
+      MIN(dc) AS min_dc,
+      MIN(fwi) AS min_fwi,
+      MIN(danger) AS min_danger,
+      MAX(temperature) AS max_temp,
+      MAX(precipitation) AS max_precip,
+      MAX(relative_humidity) AS max_humidity,
+      MAX(wind_speed) AS max_windspeed,
+      MAX(bui) AS max_bui,
+      MAX(isi) AS max_isi,
+      MAX(ffmc) AS max_ffmc,
+      MAX(dmc) AS max_dmc,
+      MAX(dc) AS max_dc,
+      MAX(fwi) AS max_fwi,
+      MAX(danger) AS max_danger,
+      AVG(temperature) AS mean_temp,
+      AVG(precipitation) AS mean_precip,
+      AVG(relative_humidity) AS mean_humidity,
+      AVG(wind_speed) AS mean_windspeed,
+      AVG(bui) AS mean_bui,
+      AVG(isi) AS mean_isi,
+      AVG(ffmc) AS mean_ffmc,
+      AVG(dmc) AS mean_dmc,
+      AVG(dc) AS mean_dc,
+      AVG(fwi) AS mean_fwi,
+      AVG(danger) AS mean_danger,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY temperature) AS median_temp,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY precipitation) AS median_precip,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY relative_humidity) AS median_humidity,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY wind_speed) AS median_windspeed,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY bui) AS median_bui,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY isi) AS median_isi,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ffmc) AS median_ffmc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY dmc) AS median_dmc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY dc) AS median_dc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fwi) AS median_fwi,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY danger) AS median_danger,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY temperature) AS q1_temp,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precipitation) AS q1_precip,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY relative_humidity) AS q1_humidity,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY wind_speed) AS q1_windspeed,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY bui) AS q1_bui,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY isi) AS q1_isi,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ffmc) AS q1_ffmc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY dmc) AS q1_dmc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY dc) AS q1_dc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY fwi) AS q1_fwi,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY danger) AS q1_danger,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY temperature) AS q3_temp,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precipitation) AS q3_precip,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY relative_humidity) AS q3_humidity,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY wind_speed) AS q3_windspeed,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY bui) AS q3_bui,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY isi) AS q3_isi,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ffmc) AS q3_ffmc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY dmc) AS q3_dmc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY dc) AS q3_dc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY fwi) AS q3_fwi,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY danger) AS q3_danger,
+      ROUND(STDDEV(temperature), 4) AS sd_temp,
+      ROUND(STDDEV(precipitation), 4) AS sd_precip,
+      ROUND(STDDEV(relative_humidity), 4) AS sd_humidity,
+      ROUND(STDDEV(wind_speed), 4) AS sd_windspeed,
+      ROUND(STDDEV(bui), 4) AS sd_bui,
+      ROUND(STDDEV(isi), 4) AS sd_isi,
+      ROUND(STDDEV(ffmc), 4) AS sd_ffmc,
+      ROUND(STDDEV(dmc), 4) AS sd_dmc,
+      ROUND(STDDEV(dc), 4) AS sd_dc,
+      ROUND(STDDEV(fwi), 4) AS sd_fwi,
+      ROUND(STDDEV(danger), 4) AS sd_danger,
+      ROUND(VARIANCE(temperature), 4) AS variance_temp,
+      ROUND(VARIANCE(precipitation), 4) AS variance_precip,
+      ROUND(VARIANCE(relative_humidity), 4) AS variance_humidity,
+      ROUND(VARIANCE(wind_speed), 4) AS variance_windspeed,
+      ROUND(VARIANCE(bui), 4) AS variance_bui,
+      ROUND(VARIANCE(isi), 4) AS variance_isi,
+      ROUND(VARIANCE(ffmc), 4) AS variance_ffmc,
+      ROUND(VARIANCE(dmc), 4) AS variance_dmc,
+      ROUND(VARIANCE(dc), 4) AS variance_dc,
+      ROUND(VARIANCE(fwi), 4) AS variance_fwi,
+      ROUND(VARIANCE(danger), 4) AS variance_danger
+    FROM wfwx.readings r
+    JOIN wfwx.station s ON s.station_code = r.station_code
+     WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
+    <if test="xmin != null and ymin != null and xmax != null and ymax != null">
+      AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+    </if>
+    <if test="long != null and lat != null and radius != null">
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+    </if>
+    <if test="station != null and useInClause == false">
+      AND s.station_code = ${station}
+    </if>
+    <if test="station != null and useInClause == true">
+      AND s.station_code IN (${station})
+    </if>
+    <if test="where != null">
+      AND ${where}
+    </if>
+    GROUP BY r.station_code, s.station_name
+  </select>
+
+  <select id="dailies_stats">
+    SELECT
+      r.station_code,
+      s.station_name,
+      MIN(temperature) AS min_temp,
+      MIN(precip_rollup) AS min_precip,
+      MIN(relative_humidity) AS min_humidity,
+      MIN(wind_speed) AS min_windspeed,
+      MIN(bui) AS min_bui,
+      MIN(isi) AS min_isi,
+      MIN(ffmc) AS min_ffmc,
+      MIN(dmc) AS min_dmc,
+      MIN(dc) AS min_dc,
+      MIN(fwi) AS min_fwi,
+      MIN(danger) AS min_danger,
+      MAX(temperature) AS max_temp,
+      MAX(precip_rollup) AS max_precip,
+      MAX(relative_humidity) AS max_humidity,
+      MAX(wind_speed) AS max_windspeed,
+      MAX(bui) AS max_bui,
+      MAX(isi) AS max_isi,
+      MAX(ffmc) AS max_ffmc,
+      MAX(dmc) AS max_dmc,
+      MAX(dc) AS max_dc,
+      MAX(fwi) AS max_fwi,
+      MAX(danger) AS max_danger,
+      AVG(temperature) AS mean_temp,
+      AVG(precip_rollup) AS mean_precip,
+      AVG(relative_humidity) AS mean_humidity,
+      AVG(wind_speed) AS mean_windspeed,
+      AVG(bui) AS mean_bui,
+      AVG(isi) AS mean_isi,
+      AVG(ffmc) AS mean_ffmc,
+      AVG(dmc) AS mean_dmc,
+      AVG(dc) AS mean_dc,
+      AVG(fwi) AS mean_fwi,
+      AVG(danger) AS mean_danger,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY temperature) AS median_temp,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY precip_rollup) AS median_precip,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY relative_humidity) AS median_humidity,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY wind_speed) AS median_windspeed,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY bui) AS median_bui,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY isi) AS median_isi,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ffmc) AS median_ffmc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY dmc) AS median_dmc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY dc) AS median_dc,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fwi) AS median_fwi,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY danger) AS median_danger,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY temperature) AS q1_temp,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precip_rollup) AS q1_precip,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY relative_humidity) AS q1_humidity,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY wind_speed) AS q1_windspeed,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY bui) AS q1_bui,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY isi) AS q1_isi,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ffmc) AS q1_ffmc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY dmc) AS q1_dmc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY dc) AS q1_dc,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY fwi) AS q1_fwi,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY danger) AS q1_danger,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY temperature) AS q3_temp,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precip_rollup) AS q3_precip,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY relative_humidity) AS q3_humidity,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY wind_speed) AS q3_windspeed,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY bui) AS q3_bui,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY isi) AS q3_isi,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ffmc) AS q3_ffmc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY dmc) AS q3_dmc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY dc) AS q3_dc,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY fwi) AS q3_fwi,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY danger) AS q3_danger,
+      ROUND(STDDEV(temperature), 4) AS sd_temp,
+      ROUND(STDDEV(precip_rollup), 4) AS sd_precip,
+      ROUND(STDDEV(relative_humidity), 4) AS sd_humidity,
+      ROUND(STDDEV(wind_speed), 4) AS sd_windspeed,
+      ROUND(STDDEV(bui), 4) AS sd_bui,
+      ROUND(STDDEV(isi), 4) AS sd_isi,
+      ROUND(STDDEV(ffmc), 4) AS sd_ffmc,
+      ROUND(STDDEV(dmc), 4) AS sd_dmc,
+      ROUND(STDDEV(dc), 4) AS sd_dc,
+      ROUND(STDDEV(fwi), 4) AS sd_fwi,
+      ROUND(STDDEV(danger), 4) AS sd_danger,
+      ROUND(VARIANCE(temperature), 4) AS variance_temp,
+      ROUND(VARIANCE(precip_rollup), 4) AS variance_precip,
+      ROUND(VARIANCE(relative_humidity), 4) AS variance_humidity,
+      ROUND(VARIANCE(wind_speed), 4) AS variance_windspeed,
+      ROUND(VARIANCE(bui), 4) AS variance_bui,
+      ROUND(VARIANCE(isi), 4) AS variance_isi,
+      ROUND(VARIANCE(ffmc), 4) AS variance_ffmc,
+      ROUND(VARIANCE(dmc), 4) AS variance_dmc,
+      ROUND(VARIANCE(dc), 4) AS variance_dc,
+      ROUND(VARIANCE(fwi), 4) AS variance_fwi,
+      ROUND(VARIANCE(danger), 4) AS variance_danger
+    FROM wfwx.readings r
+    JOIN wfwx.station s ON s.station_code = r.station_code
+     WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
+       AND r.daily_ind = true
+    <if test="xmin != null and ymin != null and xmax != null and ymax != null">
+      AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+    </if>
+    <if test="long != null and lat != null and radius != null">
+      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+    </if>
+    <if test="station != null and useInClause == false">
+      AND s.station_code = ${station}
+    </if>
+    <if test="station != null and useInClause == true">
+      AND s.station_code IN (${station})
+    </if>
+    <if test="where != null">
+      AND ${where}
+    </if>
+    GROUP BY r.station_code, s.station_name
   </select>
 </mapper>

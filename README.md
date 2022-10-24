@@ -103,6 +103,14 @@ To fetch Dailies only:
 
 {GET} `/readings/dailies`
 
+And, some statistical analysis endpoints:
+
+{GET} `/readings/statistics`
+
+{GET} `/readings/dailies/statistics`
+
+Stats endpoints will return the station name/code, and the min, max, mean, median, mode, q1, q3, standard deviation, variance for temperature, humidity, precipitation, wind speed, and indices values, including danger.
+
 Endpoints have some default basic query params you can supply:
 
 - page: the page number, Defaults to `0`
@@ -120,10 +128,11 @@ For stations, all of the above plus:
 For readings, the above plus:
 
 - stations: A comma seperated list of station codes
-- start: The start date/time `required`
-- end: The end date/time `required`
+- start: The start date/time `required` defaults to 24 hours from now
+- end: The end date/time `required` defaults to now
 
 Note that a maximum of 31 days can be returned for readings.
+Note that statistics endpoints so not have page, rows, or ordering, and you can query more than 31 days. The default will only be 24 hours, so ensure you supply sensible start and end times for statistics.
 
 ## RSQL
 
