@@ -54,10 +54,17 @@
     </if>
 	    FROM wfwx.station t
     <if test="xmin != null and ymin != null and xmax != null and ymax != null">
-      WHERE t.geometry &amp;&amp; ST_MakeEnvelope (${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+      WHERE t.geometry && ST_MakeEnvelope (${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
       WHERE ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
+    </if>
+    <if test="where != null">
+      <choose>
+        <when test="(long != null and lat != null and radius != null) or (xmin != null and ymin != null and xmax != null and ymax != null)"> AND </when>
+        <when test="long == null or xmin == null"> WHERE </when>
+      </choose>
+      ${where}
     </if>
     <if test="orderby != null and orderby.length > 0">
       ORDER BY

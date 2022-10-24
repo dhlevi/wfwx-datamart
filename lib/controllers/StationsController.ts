@@ -10,14 +10,14 @@ export class StationsController extends Controller {
   @SuccessResponse('200', 'OK')
   @NoCache()
   @Cors({ origin: false })
-  public async getStations (@Query('page') page: number, @Query('rows') rows: number, @Query('asGeojson') asGeojson: string, @Query('bbox') bbox: string, @Query('point') point: string, @Query('radius') radius: number, @Query('order') order: string) {
+  public async getStations (@Query('page') page: number, @Query('rows') rows: number, @Query('asGeojson') asGeojson: string, @Query('bbox') bbox: string, @Query('point') point: string, @Query('radius') radius: number, @Query('order') order: string, @Query('query') query: string) {
     try {
       page = page || 0
       rows = rows || 10
       const returnJson = asGeojson && (asGeojson.toLowerCase() === 'true' || asGeojson.toLowerCase() === 't' || asGeojson.toLowerCase() === '1' || asGeojson.toLowerCase() === 'y' || asGeojson.toLowerCase() === 'yes') || false
       console.log('Generate geojson: ' + returnJson)
       console.log('bbox: ' + bbox)
-      return await stationService.getStations(page, rows, returnJson, bbox, point, radius, order)
+      return await stationService.getStations(page, rows, returnJson, bbox, point, radius, order, query)
     } catch (err) {
       console.error('Error executing getStations: ' + err)
       return new ApiResponse(500, 'Failed to execute query.') 

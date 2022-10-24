@@ -15,6 +15,7 @@
     "prettier:write": "prettier --write service/**/*.{ts,tsx,js,jsx}"
   },
   "dependencies": {
+    "@mw-experts/rsql": "2.2.1",
     "axios": "0.27.2",
     "compression": "1.7.4",
     "cors": "2.8.5",

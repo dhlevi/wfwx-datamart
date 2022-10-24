@@ -45,7 +45,7 @@
       JOIN wfwx.station s ON s.station_code = r.station_code
      WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
     <if test="xmin != null and ymin != null and xmax != null and ymax != null">
-      AND s.geometry &amp;&amp; ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+      AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
       AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
@@ -55,6 +55,9 @@
     </if>
     <if test="station != null and useInClause == true">
       AND s.station_code IN (${station})
+    </if>
+    <if test="where != null">
+      AND ${where}
     </if>
     <if test="orderby != null and orderby.length > 0">
       ORDER BY
@@ -105,7 +108,7 @@
      WHERE r.timestamp_epoch BETWEEN ${start} AND ${end}
        AND r.daily_ind = true
     <if test="xmin != null and ymin != null and xmax != null and ymax != null">
-      AND s.geometry &amp;&amp; ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
+      AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
       AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), radius)
@@ -115,6 +118,9 @@
     </if>
     <if test="station != null and useInClause == true">
       AND s.station_code IN (${station})
+    </if>
+    <if test="where != null">
+      AND ${where}
     </if>
     <if test="orderby != null and orderby.length > 0">
       ORDER BY

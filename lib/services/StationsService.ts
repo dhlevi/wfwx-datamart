@@ -2,9 +2,10 @@ import { Database } from "../postgres/Database"
 import mybatisMapper = require('mybatis-mapper')
 import path = require("path")
 import { PagedResult } from "../core/model/PagedResult"
+import { RsqlToSqlConverter } from '@mw-experts/rsql'
 
 export class StationsService {
-  public async getStations (page: number, rows: number, asGeojson: boolean, bbox: string, longLat: string, radius: number, order: string): Promise<any | undefined> {
+  public async getStations (page: number, rows: number, asGeojson: boolean, bbox: string, longLat: string, radius: number, order: string, query: string): Promise<any | undefined> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/station-queries.xml')])
 
     // calculate offset
@@ -55,14 +56,21 @@ export class StationsService {
       }
     }
 
+    // handle rsql string
+    let where = null
+    if (query) {
+      where = RsqlToSqlConverter.getInstance().convert(query)
+      console.log('Appending RSQL query: ' + where)
+    }
+
     // create query and fetch result
-    const sql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: false, offset, rows, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius, orderby }, {language: 'sql', indent: ' '})
+    const sql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: false, offset, rows, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius, orderby, where }, {language: 'sql', indent: ' '}).replace('& &', '&&')
     const result = await Database.query(sql)
 
     if (result && asGeojson) {
       return result.rows[0].json_build_object
     } else {
-      const countSql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: true, offset: null, rows: null, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius }, {language: 'sql', indent: ' '})
+      const countSql = mybatisMapper.getStatement('stations', 'stations_paged', { isCount: true, offset: null, rows: null, asGeojson, xmin, ymin, xmax, ymax, long, lat, radius, where }, {language: 'sql', indent: ' '}).replace('& &', '&&')
       const countResult = await Database.query(countSql)
       if (result) {
         return new PagedResult(page, rows, Math.ceil(Number(countResult?.rows[0].count) / rows), result.rows)

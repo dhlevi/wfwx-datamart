@@ -105,12 +105,13 @@ To fetch Dailies only:
 
 Endpoints have some default basic query params you can supply:
 
-- page: the page number
-- rows: the number of rows to return
+- page: the page number, Defaults to `0`
+- rows: the number of rows to return, Defaults to `10`
 - order: Column ordering, in comma separated format, with DESC or ASC setting the order: station_code,DESC,temperature,ASC
 - point: A point location for using radius search, format of longitude,latitude
 - radius: a radius to apply for a point radius search, in metres
 - bbox: a bounding box to limit query results, format of xmin,ymin,xmax,ymax. Note: Overrides point/radius search
+- query: An RSQL/FIDQ query for more advanced searching
 
 For stations, all of the above plus:
 
@@ -119,10 +120,80 @@ For stations, all of the above plus:
 For readings, the above plus:
 
 - stations: A comma seperated list of station codes
-- start: The start date/time
-- end: The end date/time
+- start: The start date/time `required`
+- end: The end date/time `required`
 
 Note that a maximum of 31 days can be returned for readings.
+
+## RSQL
+
+RSQL is a query language for parametrized filtering of entries in RESTful APIs.
+
+It’s based on [FIQL](http://tools.ietf.org/html/draft-nottingham-atompub-fiql-00) (Feed Item Query Language)
+a URI-friendly syntax for expressing filters across the entries in an Atom Feed.
+
+The simplicity of RSQL and its capability to express complex queries in a compact and HTTP URI-friendly way
+makes it a good candidate for becoming a generic query language for searching REST endpoints.
+
+For example, you can query your resource like this:
+
+`/stations?query=elevation=gt=100,station_acronym==null`
+
+or
+`/readings?query=precipitation=ge=10;danger==5`
+
+or even
+
+`/readings?query=precipitation>=10 and danger==5`
+
+RSQL introduces simple and composite operators which can be used to build basic and complex queries.
+
+### Basic operators:
+
+| Basic Operator | Description         |
+|----------------|---------------------|
+| ==             | Equal To            |
+| !=             | Not Equal To        |
+| =gt=           | Greater Than        |
+| >              | Greater Than        |
+| =ge=           | Greater Or Equal To |
+| >=             | Greater Or Equal To |
+| =lt=           | Less Than           |
+| <              | Less Than           |
+| =le=           | Less Or Equal To    |
+| <=             | Less Or Equal To    |
+| =in=           | In                  |
+| =out=          | Not in              |
+| =includes-all= | Includes all        |
+| =includes-one= | Includes one        |
+
+These operators can be used to do all sort of simple queries.
+
+### Composite operators:
+
+| Composite Operator   | Description         |
+|----------------------|---------------------|
+| ;                    | Logical AND         |
+| and                  | Logical AND         |
+| ,                    | Logical OR          |
+| or                   | Logical OR          |
+
+These operators can be used to join the simple queries and build more involved queries which can be as complex as required.
+
+### Fields and Values
+#### Values can only consist of next regexp symbols:
+
+* in double quotes - space, any unicode letter, any unicode number, `_`, `-`, `.`, `'`, `(`, `)`
+* in single quotes - space, any unicode letter, any unicode number, `_`, `-`, `.`, `"`, `(`, `)`
+* without quotes - any unicode letter, any unicode number, `_`, `-`, `.`
+* with == or != operators you can also use asterisk `*` as a wildcard
+
+### Ordering
+
+By default, operators evaluated from left to right.
+However, a parenthesized expression can be used to change the precedence.
+
+* precipitation=lt=20;(station_name==TOBA CAMP,station_name==NICOLL)
 
 ## Data Updates
 

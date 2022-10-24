@@ -3,9 +3,10 @@ import mybatisMapper = require('mybatis-mapper')
 import path = require("path")
 import { ApiResponse } from "../core/model/ApiResponse"
 import { PagedResult } from "../core/model/PagedResult"
+import { RsqlToSqlConverter } from "@mw-experts/rsql"
 
 export class ReadingsService {
-  public async getReadings (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string): Promise<any> {
+  public async getReadings (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string, query: string): Promise<any> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/readings-queries.xml')])
 
     // Max of 31 days
@@ -53,6 +54,13 @@ export class ReadingsService {
       }
     }
 
+    // handle rsql string
+    let where = null
+    if (query) {
+      where = RsqlToSqlConverter.getInstance().convert(query)
+      console.log('Appending RSQL query: ' + where)
+    }
+
     // create query and fetch result
     const useInClause = station && station.includes(',')
 
@@ -64,9 +72,11 @@ export class ReadingsService {
       }
     }
 
-    const sql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby }, { language: 'sql', indent: ' ' })
+    // && for intersect, @ for contains... make optional?
+
+    const sql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby, where }, { language: 'sql', indent: ' ' }).replace('& &', '&&')
     const result = await Database.query(sql)
-    const countSql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
+    const countSql = mybatisMapper.getStatement('readings', 'readings_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, where }, { language: 'sql', indent: ' ' }).replace('& &', '&&')
     const countResult = await Database.query(countSql)
     if (result) {
       return new PagedResult(page, rows, Math.ceil(Number(countResult?.rows[0].count) / rows), result.rows)
@@ -75,7 +85,7 @@ export class ReadingsService {
     }
   }
 
-  public async getDailies (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string): Promise<any> {
+  public async getDailies (page: number, rows: number, bbox: string, start: Date, end: Date, station: string, longLat: string, radius: number, order: string, query: string): Promise<any> {
     mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/readings-queries.xml')])
 
     // Max of 31 days
@@ -123,6 +133,13 @@ export class ReadingsService {
       }
     }
 
+    // handle rsql string
+    let where = null
+    if (query) {
+      where = RsqlToSqlConverter.getInstance().convert(query)
+      console.log('Appending RSQL query: ' + where)
+    }
+
     // create query and fetch result
     const useInClause = station && station.includes(',')
 
@@ -134,9 +151,9 @@ export class ReadingsService {
       }
     }
 
-    const sql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby }, { language: 'sql', indent: ' ' })
+    const sql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: false, offset, rows, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, orderby, where }, { language: 'sql', indent: ' ' }).replace('& &', '&&')
     const result = await Database.query(sql)
-    const countSql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius }, { language: 'sql', indent: ' ' })
+    const countSql = mybatisMapper.getStatement('readings', 'dailies_paged', { isCount: true, offset: null, rows: null, start: start.getTime(), end: end.getTime(), xmin, ymin, xmax, ymax, station, useInClause, long, lat, radius, where }, { language: 'sql', indent: ' ' }).replace('& &', '&&')
     const countResult = await Database.query(countSql)
     if (result) {
       return new PagedResult(page, rows, Math.ceil(Number(countResult?.rows[0].count) / rows), result.rows)
