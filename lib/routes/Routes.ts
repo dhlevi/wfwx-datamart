@@ -39,5 +39,19 @@ if (!RouteManager.initializeRoutes(router)) {
 // if you don't use decorators or need to do something custom, you can add additional routes
 // as needed in the standard express js way
 // router.<method>('route', ...middleware, function)
+// Now, we can create the top level endpoint
+router.get('/', (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(200).json({
+    service: 'WFWX Datamart API',
+    links: [
+      { method: 'GET', url: 'http://datamart/readings/hourlies'},
+      { method: 'GET', url: 'http://datamart/readings/hourlies/statistics'},
+      { method: 'GET', url: 'http://datamart/readings/dailies'},
+      { method: 'GET', url: 'http://datamart/readings/dailies/statistics'},
+      { method: 'GET', url: 'http://datamart/healthCheck'},
+      { method: 'GET', url: 'http://datamart/openapi'}
+    ]
+  })
+})
 
 export default router
