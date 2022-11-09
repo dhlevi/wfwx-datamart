@@ -81,6 +81,10 @@ while historical_running:
 
       index = index + 1
 
+  historical_year = historical_year + 1
+  if historical_year == next_day.year:
+    historical_running = False
+
 #load the current year
 misses = 0
 while running:
