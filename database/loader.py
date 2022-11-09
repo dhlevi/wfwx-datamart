@@ -44,8 +44,10 @@ while historical_running:
           cursor.execute(insert)
           conn.commit()
           count = cursor.rowcount
-        except:
+        except Exception as e:
+          print("Oops!", e.__class__, "occurred.")
           print('Insert failed')
+          conn.rollback()
         finally:
           cursor.close()
 
@@ -74,8 +76,10 @@ while historical_running:
           cursor.execute(insert)
           conn.commit()
           count = cursor.rowcount
-        except:
+        except Exception as e:
+          print("Oops!", e.__class__, "occurred.")
           print('Insert failed')
+          conn.rollback()
         finally:
           cursor.close()
 
@@ -117,8 +121,10 @@ while running:
             cursor.execute(insert)
             conn.commit()
             count = cursor.rowcount
-          except:
+          except Exception as e:
+            print("Oops!", e.__class__, "occurred.")
             print('Insert failed')
+            conn.rollback()
           finally:
             cursor.close()
 

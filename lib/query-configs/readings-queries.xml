@@ -48,7 +48,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+      AND ST_DWithin(ST_Transform(geometry, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), 3857), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
@@ -111,7 +111,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+      AND ST_DWithin(ST_Transform(geometry, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), 3857), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
@@ -255,7 +255,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+      AND ST_DWithin(ST_Transform(geometry, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), 3857), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
@@ -369,7 +369,7 @@
       AND s.geometry && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
     </if>
     <if test="long != null and lat != null and radius != null">
-      AND ST_DWithin(s.geometry, ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), ${radius})
+      AND ST_DWithin(ST_Transform(geometry, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${long}, ${lat}), 4326), 3857), ${radius})
     </if>
     <if test="station != null and useInClause == false">
       AND s.station_code = ${station}
